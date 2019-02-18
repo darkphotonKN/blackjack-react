@@ -1,5 +1,6 @@
-import Hand from './Hand';
 import Deck from './Deck';
+import Player from './players/Player';
+import Dealer from './players/Dealer';
 
 export default class GameBoard extends React.Component {
   state = {
@@ -46,11 +47,13 @@ export default class GameBoard extends React.Component {
       });
     });
 
+    console.log(deck);
     return deck;
   };
 
   // shuffle deck
   shuffleDeck = (deck) => {
+    console.log('Initial:', deck);
     var j, x, i;
     for (i = deck.length - 1; i > 0; i--) {
       j = Math.floor(Math.random() * (i + 1));
@@ -58,10 +61,9 @@ export default class GameBoard extends React.Component {
       deck[i] = deck[j];
       deck[j] = x;
     }
+    console.log('After:', deck);
     return deck;
   };
-
-  shuffleDeck = () => {};
 
   // draws a single card for the deck for player or dealer
   handleDealCard = () => {
@@ -89,7 +91,7 @@ export default class GameBoard extends React.Component {
   };
 
   render() {
-    const { gameMsg, hand, dealerHand, deck } = this.state;
+    const { gameMsg, hand, dealerHand, deck, playerMoney } = this.state;
 
     console.log(this.state.deck);
     return (
@@ -97,18 +99,47 @@ export default class GameBoard extends React.Component {
         <div className="game-msg">
           {gameMsg
             ? gameMsg
-            : 'The dealer stared blankly at you. "Would you like to try a round?'}
+            : 'The dealer stares blankly at you. "Would you like to try a round?"'}
         </div>
         <button className="deal-btn" onClick={this.dealCards}>
           Deal
         </button>
         {/* Restart game, player loses */}
-        <button className="deal-btn">Fold</button>
-        {/* Dealer's */}
-        <Hand hand={dealerHand} dealer />
-        {/* Player's */}
-        <Hand hand={hand} player />
+        <button className="fold-btn">Fold</button>
+        {/* Dealer's Area */}
+        <Dealer hand={dealerHand} />
+
+        {/* Player's Area */}
+        <Player hand={hand} money={playerMoney} />
         <Deck deck={deck} />
+
+        <style jsx>{`
+          .game-msg {
+            border-radius: 4px;
+            padding: 0.4rem;
+            background-color: #1a1a1a;
+            color: #fff;
+            margin: 20px 0;
+          }
+          button {
+            border-radius: 4px;
+            padding: 0.5rem 1.2rem;
+            border: 2px solid #1a1a1a;
+            color: #1a1a1a;
+            cursor: pointer;
+            transition: all 200ms ease-in-out;
+          }
+          button.deal-btn {
+            margin-right: 20px;
+          }
+          button.deal-btn:hover {
+            background-color: #1a1a1a;
+            color: #fff;
+          }
+          button.fold-btn:hover {
+            background-color: #c0392b;
+          }
+        `}</style>
       </>
     );
   }

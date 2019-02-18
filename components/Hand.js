@@ -3,7 +3,7 @@ const Hand = ({ hand, dealer, player }) => {
   if (dealer) {
     return (
       <div className="hand">
-        <h2>Dealer's Hand</h2>
+        <h4>Dealer's Hand</h4>
         <div className="cards-on-hand">
           <ul className="hand-list list-group">
             {hand.map((card) => (
@@ -20,7 +20,7 @@ const Hand = ({ hand, dealer, player }) => {
   if (player) {
     return (
       <div className="hand">
-        <h2>Player's Hand</h2>
+        <h4>Player's Hand</h4>
         <div className="cards-on-hand">
           <ul className="hand-list list-group">
             {hand.map((card) => (
@@ -32,6 +32,8 @@ const Hand = ({ hand, dealer, player }) => {
         </div>
       </div>
     );
+  } else {
+    return null;
   }
 };
 
