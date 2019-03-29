@@ -1,10 +1,12 @@
 import Hand from '../Hand';
+import Pot from '../Pot';
 
-const Dealer = ({ hand }) => {
+const Dealer = ({ hand, money }) => {
   return (
     <div className="dealer">
       <h3 className="player-type">Dealer</h3>
       <Hand hand={hand} dealer />
+      <Pot money={money} />
       <style jsx>
         {`
           .dealer {

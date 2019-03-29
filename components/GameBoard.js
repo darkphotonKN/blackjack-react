@@ -2,6 +2,8 @@ import Deck from './Deck';
 import Player from './players/Player';
 import Dealer from './players/Dealer';
 
+import { shuffleDeck, checkWinner } from '../utils/deckUtil';
+
 export default class GameBoard extends React.Component {
   state = {
     gameMsg: '',
@@ -15,7 +17,7 @@ export default class GameBoard extends React.Component {
   componentDidMount() {
     // initialize deck
     this.setState({
-      deck: this.shuffleDeck(this.initializeDeck())
+      deck: shuffleDeck(this.initializeDeck())
     });
   }
 
@@ -51,20 +53,6 @@ export default class GameBoard extends React.Component {
     return deck;
   };
 
-  // shuffle deck
-  shuffleDeck = (deck) => {
-    console.log('Initial:', deck);
-    var j, x, i;
-    for (i = deck.length - 1; i > 0; i--) {
-      j = Math.floor(Math.random() * (i + 1));
-      x = deck[i];
-      deck[i] = deck[j];
-      deck[j] = x;
-    }
-    console.log('After:', deck);
-    return deck;
-  };
-
   // draws a single card for the deck for player or dealer
   handleDealCard = () => {
     // removes first element from the array and store it
@@ -73,25 +61,102 @@ export default class GameBoard extends React.Component {
     return cardDrawn;
   };
 
+  calculatePot = (winner, player) => {
+    if (player === 'player') {
+      if (winner === 'DEALER') {
+        if (this.state.playerMoney <= 10) {
+          return { playerMoney: 0, dealerMoney: this.state.dealerMoney + 10 };
+        } else {
+          return {
+            playerMoney: this.state.playerMoney - 10,
+            dealerMoney: this.state.dealerMoney + 10
+          };
+        }
+      } else if (winner === 'PLAYER') {
+        if (this.state.dealerMoney <= 10) {
+          return { dealerMoney: 0, playerMoney: this.state.playerMoney + 10 };
+        } else {
+          return {
+            dealerMoney: this.state.dealerMoney - 10,
+            playerMoney: this.state.playerMoney + 10
+          };
+        }
+      }
+    }
+    if (player === 'dealer') {
+      if (winner === 'DEALER') {
+        if (this.state.playerMoney <= 10) {
+          return { playerMoney: 0, dealerMoney: this.state.dealerMoney + 10 };
+        } else {
+          return {
+            playerMoney: this.state.playerMoney - 10,
+            dealerMoney: this.state.dealerMoney + 10
+          };
+        }
+      } else if (winner === 'PLAYER') {
+        if (this.state.dealerMoney <= 10) {
+          return { dealerMoney: 0, playerMoney: this.state.playerMoney + 10 };
+        } else {
+          return {
+            dealerMoney: this.state.dealerMoney - 10,
+            playerMoney: this.state.playerMoney + 10
+          };
+        }
+      }
+    }
+  };
+
   // deals cards to player and dealer
   dealCards = () => {
     // deal card for player
-    const hand = this.state.hand;
+    const hand = [...this.state.hand];
     hand.push(this.handleDealCard());
 
     // deal card for dealer
-    const dealerHand = this.state.dealerHand;
+    const dealerHand = [...this.state.dealerHand];
     dealerHand.push(this.handleDealCard());
 
-    this.setState({
-      gameMsg: 'The cards are dealt. "Goodluck, sir"',
-      hand,
-      dealerHand
-    });
+    if (hand.length < 2 && dealerHand.length < 2) {
+      this.setState({
+        gameMsg: 'The cards are dealt. "Goodluck, sir."',
+        hand,
+        dealerHand
+      });
+    } else {
+      // else play out result
+      this.setState({
+        gameMsg: 'The cards are dealt. "Let\'s see here..."',
+        hand,
+        dealerHand
+      });
+
+      // show winner
+      const winner = checkWinner(hand, dealerHand);
+
+      setTimeout(() => {
+        this.setState({
+          gameMsg:
+            winner === 'DEALER'
+              ? 'You lost this round. "Better luck next time, sir."'
+              : 'You won this round.',
+          dealerHand: [],
+          hand: [],
+          playerMoney: this.calculatePot(winner, 'player').playerMoney,
+          dealerMoney: this.calculatePot(winner, 'dealer').dealerMoney
+        });
+      }, 3500);
+    }
   };
 
   render() {
-    const { gameMsg, hand, dealerHand, deck, playerMoney } = this.state;
+    const {
+      gameMsg,
+      hand,
+      dealerHand,
+      deck,
+      playerMoney,
+      dealerMoney
+    } = this.state;
 
     console.log(this.state.deck);
     return (
@@ -99,7 +164,7 @@ export default class GameBoard extends React.Component {
         <div className="game-msg">
           {gameMsg
             ? gameMsg
-            : 'The dealer stares blankly at you. "Would you like to try a round?"'}
+            : 'The dealer stares at you blankly. "Would you like to try a round?"'}
         </div>
         <button className="deal-btn" onClick={this.dealCards}>
           Deal
@@ -107,7 +172,7 @@ export default class GameBoard extends React.Component {
         {/* Restart game, player loses */}
         <button className="fold-btn">Fold</button>
         {/* Dealer's Area */}
-        <Dealer hand={dealerHand} />
+        <Dealer hand={dealerHand} money={dealerMoney} />
 
         {/* Player's Area */}
         <Player hand={hand} money={playerMoney} />
@@ -116,7 +181,7 @@ export default class GameBoard extends React.Component {
         <style jsx>{`
           .game-msg {
             border-radius: 4px;
-            padding: 0.4rem;
+            padding: 0.5rem 0.7rem;
             background-color: #1a1a1a;
             color: #fff;
             margin: 20px 0;

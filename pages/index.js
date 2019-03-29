@@ -9,7 +9,7 @@ const Index = () => {
 
       <style jsx>{`
         * {
-          font-family: 'Helvetica';
+          font-family: 'Slabo 27px';
         }
 
         body {

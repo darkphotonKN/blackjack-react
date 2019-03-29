@@ -4,13 +4,16 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "express": "^4.16.4",
     "next": "^8.0.0",
+    "nodemon": "^1.18.10",
     "react": "^16.8.1",
     "react-dom": "^16.8.1"
   },
   "devDependencies": {},
   "scripts": {
-    "dev": "next -p 3003"
+    "dev": "next -p 3003",
+    "server": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
