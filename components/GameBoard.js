@@ -11,7 +11,9 @@ export default class GameBoard extends React.Component {
     dealerMoney: 0,
     deck: [],
     hand: [],
-    dealerHand: []
+    dealerHand: [],
+    // whether or not to show the game controls
+    hideButtons: false
   };
 
   componentDidMount() {
@@ -51,6 +53,20 @@ export default class GameBoard extends React.Component {
 
     console.log(deck);
     return deck;
+  };
+
+  handleResetGame = () => {
+    const shuffledDeck = shuffleDeck(this.initializeDeck());
+
+    // reset game state after shuffling
+    this.setState({
+      gameMsg: 'Game was reset. "Care to try another round, sir?"',
+      playerMoney: 100,
+      dealerMoney: 0,
+      deck: shuffledDeck,
+      hand: [],
+      dealerHand: []
+    });
   };
 
   // draws a single card for the deck for player or dealer
@@ -127,7 +143,8 @@ export default class GameBoard extends React.Component {
       this.setState({
         gameMsg: 'The cards are dealt. "Let\'s see here..."',
         hand,
-        dealerHand
+        dealerHand,
+        hideButtons: true
       });
 
       // show winner
@@ -142,7 +159,8 @@ export default class GameBoard extends React.Component {
           dealerHand: [],
           hand: [],
           playerMoney: this.calculatePot(winner, 'player').playerMoney,
-          dealerMoney: this.calculatePot(winner, 'dealer').dealerMoney
+          dealerMoney: this.calculatePot(winner, 'dealer').dealerMoney,
+          hideButtons: false
         });
       }, 3500);
     }
@@ -155,7 +173,8 @@ export default class GameBoard extends React.Component {
       dealerHand,
       deck,
       playerMoney,
-      dealerMoney
+      dealerMoney,
+      hideButtons
     } = this.state;
 
     console.log(this.state.deck);
@@ -166,11 +185,20 @@ export default class GameBoard extends React.Component {
             ? gameMsg
             : 'The dealer stares at you blankly. "Would you like to try a round?"'}
         </div>
-        <button className="deal-btn" onClick={this.dealCards}>
+
+        <button
+          className={!hideButtons ? 'deal-btn' : 'deal-btn disabled'}
+          onClick={this.dealCards}
+        >
           Deal
         </button>
         {/* Restart game, player loses */}
-        <button className="fold-btn">Fold</button>
+        <button
+          className={!hideButtons ? 'fold-btn' : 'fold-btn disabled'}
+          onClick={this.handleResetGame}
+        >
+          Fold
+        </button>
         {/* Dealer's Area */}
         <Dealer hand={dealerHand} money={dealerMoney} />
 
@@ -203,6 +231,11 @@ export default class GameBoard extends React.Component {
           }
           button.fold-btn:hover {
             background-color: #c0392b;
+          }
+
+          .disabled {
+            pointer-events: none;
+            background-color: #aaa;
           }
         `}</style>
       </>

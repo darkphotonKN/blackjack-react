@@ -1,6 +1,6 @@
 const Deck = ({ deck }) => {
   return (
-    <div>
+    <div className="deck">
       <h2>Deck</h2>
       <ul className="deck">
         {deck
@@ -9,6 +9,14 @@ const Deck = ({ deck }) => {
             ))
           : null}
       </ul>
+
+      <style jsx>
+        {`
+          .deck {
+            margin-top: 30px;
+          }
+        `}
+      </style>
     </div>
   );
 };
