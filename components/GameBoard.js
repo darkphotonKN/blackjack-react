@@ -2,7 +2,7 @@ import Deck from './Deck';
 import Player from './players/Player';
 import Dealer from './players/Dealer';
 
-import { shuffleDeck, checkWinner } from '../utils/deckUtil';
+import { shuffleDeck, checkWinner, checkBust } from '../utils/deckUtil';
 
 export default class GameBoard extends React.Component {
   state = {
@@ -56,11 +56,12 @@ export default class GameBoard extends React.Component {
   };
 
   handleResetGame = () => {
+    // shuffles deck
     const shuffledDeck = shuffleDeck(this.initializeDeck());
 
     // reset game state after shuffling
     this.setState({
-      gameMsg: 'Game was reset. "Care to try another round, sir?"',
+      gameMsg: 'Game was reset. "Care to try another round?"',
       playerMoney: 100,
       dealerMoney: 0,
       deck: shuffledDeck,
@@ -75,6 +76,31 @@ export default class GameBoard extends React.Component {
     const cardDrawn = this.state.deck.shift();
 
     return cardDrawn;
+  };
+
+  handleEndRound = () => {
+    // play out result
+    this.setState({
+      gameMsg: 'The dealer reveals his card. "Let\'s see here..."',
+      hideButtons: true
+    });
+
+    // show winner
+    const winner = checkWinner(this.state.hand, this.state.dealerHand);
+
+    setTimeout(() => {
+      this.setState({
+        gameMsg:
+          winner === 'DEALER'
+            ? 'You lost this round. "Better luck next time, sir."'
+            : 'You won this round.',
+        dealerHand: [],
+        hand: [],
+        playerMoney: this.calculatePot(winner, 'player').playerMoney,
+        dealerMoney: this.calculatePot(winner, 'dealer').dealerMoney,
+        hideButtons: false
+      });
+    }, 1700);
   };
 
   calculatePot = (winner, player) => {
@@ -124,45 +150,36 @@ export default class GameBoard extends React.Component {
 
   // deals cards to player and dealer
   dealCards = () => {
-    // deal card for player
     const hand = [...this.state.hand];
-    hand.push(this.handleDealCard());
-
-    // deal card for dealer
     const dealerHand = [...this.state.dealerHand];
-    dealerHand.push(this.handleDealCard());
 
-    if (hand.length < 2 && dealerHand.length < 2) {
+    console.log('Checking if tested hand is bust', checkBust(['J', 5, 7]));
+
+    if (hand.length < 2) {
+      // deal card for player
+      hand.push(this.handleDealCard());
+
+      // deal card for dealer
+      dealerHand.push(this.handleDealCard());
+
+      // update state with changes and new message to player
       this.setState({
         gameMsg: 'The cards are dealt. "Goodluck, sir."',
         hand,
         dealerHand
       });
     } else {
-      // else play out result
+      // deal card for player only
+      hand.push(this.handleDealCard());
+
+      // check for bust
+
+      // update state with changes and new message to player
       this.setState({
-        gameMsg: 'The cards are dealt. "Let\'s see here..."',
+        gameMsg: 'A card is dealt for you. "Goodluck, sir."',
         hand,
-        dealerHand,
-        hideButtons: true
+        dealerHand
       });
-
-      // show winner
-      const winner = checkWinner(hand, dealerHand);
-
-      setTimeout(() => {
-        this.setState({
-          gameMsg:
-            winner === 'DEALER'
-              ? 'You lost this round. "Better luck next time, sir."'
-              : 'You won this round.',
-          dealerHand: [],
-          hand: [],
-          playerMoney: this.calculatePot(winner, 'player').playerMoney,
-          dealerMoney: this.calculatePot(winner, 'dealer').dealerMoney,
-          hideButtons: false
-        });
-      }, 3500);
     }
   };
 
@@ -192,12 +209,20 @@ export default class GameBoard extends React.Component {
         >
           Deal
         </button>
-        {/* Restart game, player loses */}
+
+        {/* Ends turn to check for winner */}
+        <button
+          className={!hideButtons ? 'end-btn' : 'fold-btn disabled'}
+          onClick={this.handleEndRound}
+        >
+          End Round
+        </button>
+        {/* Restart game, player loses unfinished round */}
         <button
           className={!hideButtons ? 'fold-btn' : 'fold-btn disabled'}
           onClick={this.handleResetGame}
         >
-          Fold
+          Restart
         </button>
         {/* Dealer's Area */}
         <Dealer hand={dealerHand} money={dealerMoney} />
@@ -222,14 +247,16 @@ export default class GameBoard extends React.Component {
             cursor: pointer;
             transition: all 200ms ease-in-out;
           }
-          button.deal-btn {
+          button.deal-btn,
+          button.end-btn {
             margin-right: 20px;
           }
           button.deal-btn:hover {
             background-color: #1a1a1a;
             color: #fff;
           }
-          button.fold-btn:hover {
+          button.fold-btn:hover,
+          button.end-btn:hover {
             background-color: #c0392b;
           }
 

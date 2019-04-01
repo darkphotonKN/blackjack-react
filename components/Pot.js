@@ -1,5 +1,14 @@
 const Pot = ({ money }) => {
-  return <div>Pot: {money}</div>;
+  return (
+    <div className="pot">
+      Pot: {money}
+      <style jsx>{`
+        .pot {
+          margin-top: 10px;
+        }
+      `}</style>
+    </div>
+  );
 };
 
 export default Pot;

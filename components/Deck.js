@@ -1,7 +1,7 @@
 const Deck = ({ deck }) => {
   return (
     <div className="deck">
-      <h2>Deck</h2>
+      <h2>Deck (For Testing)</h2>
       <ul className="deck">
         {deck
           ? deck.map((card) => (
