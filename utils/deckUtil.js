@@ -20,29 +20,29 @@ export const checkWinner = (playerHand, dealerHand) => {
   console.log("Player's Hand:", playerHand);
   console.log("Dealer's Hand:", dealerHand);
 
-  const playerTotal = playerHand.reduce(
-    (card1, card2) => checkCardValue(card1.value) + checkCardValue(card2.value)
-  );
+  const playerTotal = playerHand.reduce((card1, card2) => {
+    return { value: checkCardValue(card1.value) + checkCardValue(card2.value) };
+  });
   console.log("Player's Total:", playerTotal);
   const dealerTotal = dealerHand.reduce(
     (card1, card2) => checkCardValue(card1.value) + checkCardValue(card2.value)
   );
 
-  console.log(`Player total: ${playerTotal}, Dealer total: ${dealerTotal}`);
+  console.log('Player total:', playerTotal.value);
+  console.log(`Dealer total: ${dealerTotal}`);
 
-  return playerTotal > dealerTotal ? 'PLAYER' : 'DEALER';
+  return playerTotal.value > dealerTotal ? 'PLAYER' : 'DEALER';
 };
 
+// checks if current hand is a bust
 export const checkBust = (hand) => {
-  console.log('First Card Value:', checkCardValue(hand[0]));
-  console.log('Second Card Value:', checkCardValue(hand[1]));
-  console.log('Third Card Value:', checkCardValue(hand[2]));
+  const checkTotal = hand.reduce((acc, card) => {
+    console.log('Iterating\n-----------\nStarting:', card);
+    // console.log('Card2:', card2);
+    // console.log('Current Total:', checkCardValue(card1.value));
+    // console.log('Adding value:', checkCardValue(card2.value));
 
-  const checkTotal = hand.reduce((card1, card2) => {
-    console.log('Card1:', checkCardValue(card1));
-    console.log('Card2:', checkCardValue(card2));
-
-    return checkCardValue(card2) + checkCardValue(card1);
+    return { value: checkCardValue(acc.value) + checkCardValue(card.value) };
   });
 
   console.log('TOTAL TEST:', checkTotal);
@@ -55,10 +55,11 @@ export const checkBust = (hand) => {
     )
   );
   return (
-    hand.reduce(
-      (card1, card2) =>
-        checkCardValue(card1.value) + checkCardValue(card2.value)
-    ) > 21
+    hand.reduce((card1, card2) => {
+      return {
+        value: checkCardValue(card1.value) + checkCardValue(card2.value)
+      };
+    }).value > 21
   );
 };
 

@@ -153,7 +153,10 @@ export default class GameBoard extends React.Component {
     const hand = [...this.state.hand];
     const dealerHand = [...this.state.dealerHand];
 
-    console.log('Checking if tested hand is bust', checkBust(['J', 5, 7]));
+    console.log(
+      'Checking if tested hand is bust',
+      checkBust([{ value: '7' }, { value: '5' }, { value: '7' }])
+    );
 
     if (hand.length < 2) {
       // deal card for player
@@ -172,14 +175,28 @@ export default class GameBoard extends React.Component {
       // deal card for player only
       hand.push(this.handleDealCard());
 
+      const bust = checkBust(hand);
       // check for bust
+      console.log('Bust?:', checkBust(hand));
 
-      // update state with changes and new message to player
-      this.setState({
-        gameMsg: 'A card is dealt for you. "Goodluck, sir."',
-        hand,
-        dealerHand
-      });
+      if (bust) {
+        // player automatically loses round
+        this.setState({
+          gameMsg:
+            'Your hand is bust! You lose the round. "Better luck next time, sir."',
+          dealerHand: [],
+          hand: [],
+          playerMoney: this.state.playerMoney - 10,
+          dealerMoney: this.state.dealerMoney + 10
+        });
+      } else {
+        // update state with changes and new message to player
+        this.setState({
+          gameMsg: 'A card is dealt for you. "Goodluck, sir."',
+          hand,
+          dealerHand
+        });
+      }
     }
   };
 
@@ -212,14 +229,22 @@ export default class GameBoard extends React.Component {
 
         {/* Ends turn to check for winner */}
         <button
-          className={!hideButtons ? 'end-btn' : 'fold-btn disabled'}
+          className={
+            !hideButtons && dealerHand.length > 1
+              ? 'end-btn'
+              : 'end-btn disabled'
+          }
           onClick={this.handleEndRound}
         >
           End Round
         </button>
         {/* Restart game, player loses unfinished round */}
         <button
-          className={!hideButtons ? 'fold-btn' : 'fold-btn disabled'}
+          className={
+            !hideButtons && dealerHand.length > 0
+              ? 'fold-btn'
+              : 'fold-btn disabled'
+          }
           onClick={this.handleResetGame}
         >
           Restart
